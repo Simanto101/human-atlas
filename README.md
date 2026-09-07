@@ -2,7 +2,7 @@
 
 An interactive 3D anatomy explorer built with React, Three.js, and shadcn/ui. Explore the BodyParts3D male reference (**2,234 meshes, 3,432 named concepts**) or a female study prototype (**2,243 meshes, 4,246 concepts**) derived from the BodyParts3D framework, fitted HRA female organs and pelvis, an illustrated breast body, and a whole-body morph toward estimated female proportions. The HRA female source atlas still ships for validation and rebuilds but is not offered in the viewer.
 
-**[Explore the live demo](https://human-atlas-seven.vercel.app)**
+**[Explore the live demo](https://simanto101.github.io/human-atlas/)**
 
 ## Explore
 
@@ -69,6 +69,8 @@ To rebuild the female geometry, `python3 scripts/convert-female.py SOURCE.glb SO
 Rebuild the experimental female additions with `python3 scripts/build-female-reconstruction.py` (requires NumPy). This uses the already bundled source atlases and writes a separate manifest and chunks; do not run the source simplifier on the composed reconstruction.
 
 ## Deploy
+
+GitHub Pages is the default live preview. Pushing to `main` builds the static site and publishes it at https://simanto101.github.io/human-atlas/ (`/` and `/male` load male anatomy; `/female` loads the female study model).
 
 Import this repository into Vercel as a Vite project. The included `vercel.json` configures `npm ci`, `npm run build`, and the `dist` output directory. The configuration rewrites `/female` and `/male` to the app entry so direct links and refreshes work. It also temporarily redirects `/` to `/male` (HTTP 307). Other static hosts need this server-side redirect and the same two rewrites to `/index.html`.
 

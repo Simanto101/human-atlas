@@ -1,3 +1,4 @@
+import {copyFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import type {IncomingMessage,ServerResponse} from 'node:http';
 import {fileURLToPath} from 'node:url';
 import {defineConfig,type Plugin} from 'vite';
@@ -16,4 +17,16 @@ const modelRedirect:Plugin={
  configureServer(server){server.middlewares.use(redirectRoot);},
  configurePreviewServer(server){server.middlewares.use(redirectRoot);},
 };
-export default defineConfig({root:path('./web'),publicDir:path('./public'),plugins:[modelRedirect,react()],resolve:{alias:{'@':path('./')}},css:{postcss:{plugins:[tailwindcss()]}},server:{watch:{usePolling:true},allowedHosts:['.monkeycode-ai.live']},build:{outDir:path('./dist'),emptyOutDir:true}});
+const pagesFallbacks:Plugin={
+ name:'github-pages-fallbacks',
+ closeBundle(){
+  const index=path('./dist/index.html');
+  writeFileSync(path('./dist/.nojekyll'),'');
+  copyFileSync(index,path('./dist/404.html'));
+  mkdirSync(path('./dist/male'),{recursive:true});
+  mkdirSync(path('./dist/female'),{recursive:true});
+  copyFileSync(index,path('./dist/male/index.html'));
+  copyFileSync(index,path('./dist/female/index.html'));
+ },
+};
+export default defineConfig({root:path('./web'),publicDir:path('./public'),base:process.env.GITHUB_PAGES==='true'?'/human-atlas/':'/',plugins:[modelRedirect,react(),pagesFallbacks],resolve:{alias:{'@':path('./')}},css:{postcss:{plugins:[tailwindcss()]}},server:{watch:{usePolling:true},allowedHosts:['.monkeycode-ai.live']},build:{outDir:path('./dist'),emptyOutDir:true}});
