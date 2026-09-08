@@ -25,26 +25,55 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
   const scene=new T.Scene(),camera=new T.PerspectiveCamera(34,1,.005,100),controls=new OrbitControls(camera,renderer.domElement);
    camera.position.set(1.4,1.05,3.6);controls.target.set(0,.85,0);controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=.02;controls.maxDistance=80;controls.maxPolarAngle=Math.PI;controls.minPolarAngle=0;controls.zoomToCursor=true;controls.enableZoom=true;controls.zoomSpeed=1.15;controls.addEventListener('change',()=>{dirty=true;});
   const pmrem=new T.PMREMGenerator(renderer),room=new RoomEnvironment(),env=pmrem.fromScene(room,.04);scene.environment=env.texture;room.dispose();pmrem.dispose();
-   const hemi=new T.HemisphereLight(0xffffff,0xa7acb2,1.05);scene.add(hemi);
-   const key=new T.DirectionalLight(0xfffaf4,2.3);key.position.set(-2,4,3);scene.add(key);
-   const rim=new T.DirectionalLight(0xe9f0ff,1.8);rim.position.set(2,2,-3);scene.add(rim);
-   const ground=new T.Mesh(new T.CircleGeometry(30,96),new T.MeshStandardMaterial({color:hex('--scene-ground')||0xcfe8ee,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.019;scene.add(ground);
-   const platform=new T.Mesh(new T.CylinderGeometry(.68,.7,.028,100),new T.MeshStandardMaterial({color:hex('--scene-platform')||0xe0f7fb,metalness:.12,roughness:.67}));platform.position.y=-.016;scene.add(platform);
-   const ring=new T.Mesh(new T.RingGeometry(.63,.632,128),new T.MeshBasicMaterial({color:hex('--scene-ring')||0x0891b2,transparent:true,opacity:.4,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.001;scene.add(ring);
-   const innerRing=new T.Mesh(new T.RingGeometry(.55,.551,128),new T.MeshBasicMaterial({color:hex('--scene-ring')||0x22d3ee,transparent:true,opacity:.16,side:T.DoubleSide}));innerRing.rotation.x=-Math.PI/2;innerRing.position.y=.001;scene.add(innerRing);
-   const applySceneTheme=()=>{
-    const dark=document.documentElement.classList.contains('dark');
-    renderer.setClearColor(hex('--scene-clear')||(dark?0x07151c:0xecfeff));
-    ground.material.color.setHex(hex('--scene-ground')||(dark?0x0d2530:0xcfe8ee));
-    platform.material.color.setHex(hex('--scene-platform')||(dark?0x123744:0xe0f7fb));
-    ring.material.color.setHex(hex('--scene-ring')||0x0891b2);
-    innerRing.material.color.setHex(hex('--scene-ring')||0x22d3ee);
-    hemi.groundColor.setHex(dark?0x14313c:0xa7acb2);
-    hemi.intensity=dark?0.72:1.05;
-    key.intensity=dark?1.6:2.3;
-    rim.intensity=dark?1.15:1.8;
-    dirty=true;
-   };
+   const lab=new T.Group();scene.add(lab);
+    const tileCanvas=document.createElement('canvas');tileCanvas.width=tileCanvas.height=128;
+    const tileCtx=tileCanvas.getContext('2d')!;
+    const paintFloor=(dark:boolean)=>{tileCtx.fillStyle=dark?'#082028':'#d7eef2';tileCtx.fillRect(0,0,128,128);tileCtx.strokeStyle=dark?'#163948':'#b7d4db';tileCtx.lineWidth=5;tileCtx.strokeRect(2,2,124,124);};
+    paintFloor(document.documentElement.classList.contains('dark'));
+    const tileMap=new T.CanvasTexture(tileCanvas);tileMap.wrapS=tileMap.wrapT=T.RepeatWrapping;tileMap.repeat.set(26,26);tileMap.colorSpace=T.SRGBColorSpace;tileMap.anisotropy=4;
+    const hemi=new T.HemisphereLight(0xffffff,0xa7acb2,1.05);scene.add(hemi);
+    const key=new T.DirectionalLight(0xfffaf4,2.05);key.position.set(-1.6,5.2,2.4);scene.add(key);
+    const rim=new T.DirectionalLight(0xe9f0ff,1.35);rim.position.set(2.4,2.2,-3.2);scene.add(rim);
+    const exam=new T.SpotLight(0xf8fdff,18,14,.42,.55,1.1);exam.position.set(0,5.4,1.1);exam.target.position.set(0,.9,0);lab.add(exam,exam.target);
+    const fillLamp=new T.PointLight(0xd7f6fb,4.2,12,.9);fillLamp.position.set(-2.2,4.8,2.2);lab.add(fillLamp);
+    const ground=new T.Mesh(new T.PlaneGeometry(20,20),new T.MeshStandardMaterial({map:tileMap,roughness:.92,metalness:.04}));ground.rotation.x=-Math.PI/2;ground.position.y=-.021;lab.add(ground);
+    const wallMat=new T.MeshStandardMaterial({color:0xf4fbfc,roughness:.96,metalness:.02});
+    const backWall=new T.Mesh(new T.PlaneGeometry(20,6.2),wallMat);backWall.position.set(0,3.08,-9.4);lab.add(backWall);
+    const leftWall=new T.Mesh(new T.PlaneGeometry(20,6.2),wallMat.clone());leftWall.rotation.y=Math.PI/2;leftWall.position.set(-9.4,3.08,0);lab.add(leftWall);
+    const rightWall=new T.Mesh(new T.PlaneGeometry(20,6.2),wallMat.clone());rightWall.rotation.y=-Math.PI/2;rightWall.position.set(9.4,3.08,0);lab.add(rightWall);
+    const ceiling=new T.Mesh(new T.PlaneGeometry(20,20),new T.MeshStandardMaterial({color:0xffffff,roughness:1}));ceiling.rotation.x=Math.PI/2;ceiling.position.y=6.15;lab.add(ceiling);
+    const baseboard=new T.Mesh(new T.BoxGeometry(20,.08,.04),new T.MeshStandardMaterial({color:0x9ecad6,roughness:.5,metalness:.2}));baseboard.position.set(0,.02,-9.38);lab.add(baseboard);
+    const cabinet=new T.Mesh(new T.BoxGeometry(7.4,1.05,.62),new T.MeshStandardMaterial({color:0xe8f4f7,roughness:.55,metalness:.18}));cabinet.position.set(0,.5,-9.05);lab.add(cabinet);
+    const counter=new T.Mesh(new T.BoxGeometry(7.5,.05,.68),new T.MeshStandardMaterial({color:0xd5eef3,roughness:.35,metalness:.28}));counter.position.set(0,1.04,-9.05);lab.add(counter);
+    const windowPane=new T.Mesh(new T.PlaneGeometry(4.2,2.1),new T.MeshPhysicalMaterial({color:0xbfeaf4,transparent:true,opacity:.28,roughness:.08,metalness:.1,transmission:.6,thickness:.02}));windowPane.rotation.y=Math.PI/2;windowPane.position.set(-9.38,3.1,-1.6);lab.add(windowPane);
+    const windowFrame=new T.Mesh(new T.BoxGeometry(.06,2.28,4.4),new T.MeshStandardMaterial({color:0x8eb8c3,metalness:.35,roughness:.4}));windowFrame.position.set(-9.39,3.1,-1.6);lab.add(windowFrame);
+    const makeLamp=(x:number,z:number)=>{const housing=new T.Mesh(new T.BoxGeometry(2.6,.07,.22),new T.MeshStandardMaterial({color:0xe2eef2,metalness:.45,roughness:.28,emissive:0xcff7ff,emissiveIntensity:.85}));housing.position.set(x,6.05,z);lab.add(housing);};
+    makeLamp(-1.8,1.2);makeLamp(1.8,1.2);makeLamp(0,-1.6);
+    const platform=new T.Mesh(new T.CylinderGeometry(.72,.78,.036,72),new T.MeshStandardMaterial({color:hex('--scene-platform')||0xe8f4f7,metalness:.42,roughness:.32}));platform.position.y=-.014;scene.add(platform);
+    const ring=new T.Mesh(new T.RingGeometry(.66,.668,128),new T.MeshBasicMaterial({color:hex('--scene-ring')||0x0891b2,transparent:true,opacity:.55,side:T.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.005;scene.add(ring);
+    const innerRing=new T.Mesh(new T.RingGeometry(.58,.582,128),new T.MeshBasicMaterial({color:hex('--scene-ring')||0x22d3ee,transparent:true,opacity:.22,side:T.DoubleSide}));innerRing.rotation.x=-Math.PI/2;innerRing.position.y=.005;scene.add(innerRing);
+    const applySceneTheme=()=>{
+     const dark=document.documentElement.classList.contains('dark');
+     renderer.setClearColor(hex('--scene-clear')||(dark?0x07151c:0xecfeff));
+     paintFloor(dark);tileMap.needsUpdate=true;
+     wallMat.color.setHex(dark?0x0c2430:0xf4fbfc);
+     leftWall.material.color.setHex(dark?0x0c2430:0xf4fbfc);
+     rightWall.material.color.setHex(dark?0x0c2430:0xf4fbfc);
+     ceiling.material.color.setHex(dark?0x0a1c24:0xffffff);
+     cabinet.material.color.setHex(dark?0x123744:0xe8f4f7);
+     counter.material.color.setHex(dark?0x1a4b5c:0xd5eef3);
+     baseboard.material.color.setHex(dark?0x22d3ee:0x9ecad6);
+     platform.material.color.setHex(hex('--scene-platform')||(dark?0x123744:0xe8f4f7));
+     ring.material.color.setHex(hex('--scene-ring')||0x0891b2);
+     innerRing.material.color.setHex(hex('--scene-ring')||0x22d3ee);
+     hemi.groundColor.setHex(dark?0x14313c:0xa7acb2);
+     hemi.intensity=dark?0.55:0.92;
+     key.intensity=dark?1.15:2.05;
+     rim.intensity=dark?0.85:1.35;
+     exam.intensity=dark?11:18;
+     fillLamp.intensity=dark?2.4:4.2;
+     dirty=true;
+    };
    applySceneTheme();
    const themeObserver=new MutationObserver(applySceneTheme);
    themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
@@ -182,12 +211,12 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
     }else if(lastIsolate){camera.clearViewOffset();fit(s.view,amount);}
     lastIsolate=isolateKey;
    }
-   controls.enableRotate=amount<.8;controls.mouseButtons.LEFT=amount<.8?T.MOUSE.ROTATE:T.MOUSE.PAN;controls.touches.ONE=amount<.8?T.TOUCH.ROTATE:T.TOUCH.PAN;ground.visible=platform.visible=ring.visible=innerRing.visible=amount<.5&&!s.isolate;markers.visible=amount>.75;controls.autoRotate=s.rotate&&!s.isolate&&amount<.4;controls.autoRotateSpeed=.65;controls.update();if(controls.autoRotate)dirty=true;
+   controls.enableRotate=amount<.8;controls.mouseButtons.LEFT=amount<.8?T.MOUSE.ROTATE:T.MOUSE.PAN;controls.touches.ONE=amount<.8?T.TOUCH.ROTATE:T.TOUCH.PAN;lab.visible=platform.visible=ring.visible=innerRing.visible=amount<.5&&!s.isolate;markers.visible=amount>.75;controls.autoRotate=s.rotate&&!s.isolate&&amount<.4;controls.autoRotateSpeed=.65;controls.update();if(controls.autoRotate)dirty=true;
    if(dirty){renderer.render(scene,camera);targets=[];if(amount>.45){const hasSolid=atlas.parts.some((p,i)=>!isBodySurface(p)&&data[i*4+3]>.5);atlas.parts.forEach((p,i)=>{if(data[i*4+3]<.5||(hasSolid&&isBodySurface(p)))return;let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;for(let corner=0;corner<8;corner++){projected.set(p.bounds[(corner&1)?1:0][0]+data[i*4],p.bounds[(corner&2)?1:0][1]+data[i*4+1],p.bounds[(corner&4)?1:0][2]+data[i*4+2]).project(camera);const x=(projected.x+1)*el.clientWidth/2,y=(1-projected.y)*el.clientHeight/2;left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}projected.copy(centers[i]).add(new T.Vector3(data[i*4],data[i*4+1],data[i*4+2])).project(camera);if(projected.z< -1||projected.z>1)return;targets.push({index:i,x:(projected.x+1)*el.clientWidth/2,y:(1-projected.y)*el.clientHeight/2,left,right,top,bottom});});}dirty=false;}
 
   };animate();
   const contextLost=(e:Event)=>{e.preventDefault();onError('The 3D session was paused by your device. Reload to continue.');};renderer.domElement.addEventListener('webglcontextlost',contextLost);
-     return()=>{disposed=true;abort.abort();cancelAnimationFrame(frame);observer.disconnect();themeObserver.disconnect();controls.dispose();geometries.forEach(g=>g.dispose());tissueMaps?.map.dispose();tissueMaps?.bump.dispose();materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o instanceof T.Mesh&&!geometries.includes(o.geometry)){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});env.dispose();partTexture.dispose();selectionTexture.dispose();markerGeometry.dispose();markerMaterial.dispose();hover.remove();renderer.dispose();renderer.domElement.remove();};
+     return()=>{disposed=true;abort.abort();cancelAnimationFrame(frame);observer.disconnect();themeObserver.disconnect();controls.dispose();geometries.forEach(g=>g.dispose());tissueMaps?.map.dispose();tissueMaps?.bump.dispose();materials.forEach(m=>m.dispose());tileMap.dispose();scene.traverse(o=>{if(o instanceof T.Mesh&&!geometries.includes(o.geometry)){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});env.dispose();partTexture.dispose();selectionTexture.dispose();markerGeometry.dispose();markerMaterial.dispose();hover.remove();renderer.dispose();renderer.domElement.remove();};
  },[atlas]);
  return <div className="scene" ref={host}/>;
 }

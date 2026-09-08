@@ -12,10 +12,24 @@ function redirectRoot(req:IncomingMessage,res:ServerResponse,next:()=>void){
  res.writeHead(307,{Location:'/male'+url.search,'Cache-Control':'no-store'});
  res.end();
 }
+async function translateProxy(req:IncomingMessage,res:ServerResponse,next:()=>void){
+ const url=new URL(req.url??'/','http://localhost');
+ if(url.pathname!=='/api/translate'){next();return;}
+ try{
+  const target='https://translate.googleapis.com/translate_a/single'+url.search;
+  const r=await fetch(target,{headers:{Accept:'application/json'}});
+  const body=await r.text();
+  res.writeHead(r.status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+  res.end(body);
+ }catch{
+  res.writeHead(502,{'Content-Type':'application/json'});
+  res.end(JSON.stringify({error:'translate failed'}));
+ }
+}
 const modelRedirect:Plugin={
  name:'model-root-redirect',
- configureServer(server){server.middlewares.use(redirectRoot);},
- configurePreviewServer(server){server.middlewares.use(redirectRoot);},
+ configureServer(server){server.middlewares.use(redirectRoot);server.middlewares.use(translateProxy);},
+ configurePreviewServer(server){server.middlewares.use(redirectRoot);server.middlewares.use(translateProxy);},
 };
 const pagesFallbacks:Plugin={
  name:'github-pages-fallbacks',
