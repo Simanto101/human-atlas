@@ -21,27 +21,25 @@ function tiles(dark:boolean){
  const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(14,14);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t;
 }
 
-function frameMesh(exhibit:LabExhibit,dark:boolean){
- const group=new T.Group();
- const art=paintExhibit(exhibit.id);
- const map=new T.CanvasTexture(art);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
- const w=1.05,h=1.32,d=.045;
- const wood=new T.MeshStandardMaterial({color:dark?0x8a6a3a:0xb0894f,roughness:.45,metalness:.18});
- const outer=new T.Mesh(new T.BoxGeometry(w+.12,h+.12,d),wood);
- const mat=new T.MeshStandardMaterial({color:dark?0x1b3844:0xf4ead7,roughness:.9});
- const mount=new T.Mesh(new T.BoxGeometry(w+.02,h+.02,.01),mat);mount.position.z=d*.52;
- const print=new T.Mesh(new T.PlaneGeometry(w-.08,h-.16),new T.MeshStandardMaterial({map,roughness:.7,metalness:0}));print.position.z=d*.58;
- const glass=new T.Mesh(new T.PlaneGeometry(w-.04,h-.1),new T.MeshPhysicalMaterial({color:0xd7f4ff,transparent:true,opacity:.12,roughness:.05,metalness:.1,transmission:.35,thickness:.01}));glass.position.z=d*.62;
- const plate=new T.Mesh(new T.BoxGeometry(.72,.1,.02),new T.MeshStandardMaterial({color:dark?0xc9a45a:0xe8d5a3,metalness:.4,roughness:.35}));plate.position.set(0,-(h/2)-.12,d*.4);
- const lamp=new T.Mesh(new T.BoxGeometry(.7,.04,.08),new T.MeshStandardMaterial({color:0xe8f4f7,emissive:0xcff7ff,emissiveIntensity:dark?.7:.45,metalness:.4,roughness:.3}));lamp.position.set(0,h/2+.1,.08);
- print.userData.exhibit=exhibit;glass.userData.exhibit=exhibit;outer.userData.exhibit=exhibit;
- group.add(outer,mount,print,glass,plate,lamp);
- group.userData.exhibit=exhibit;
- group.userData.maps=[map];
- group.userData.wood=wood;
- group.userData.mat=mat;
- return group;
-}
+ function frameMesh(exhibit:LabExhibit,dark:boolean){
+  const group=new T.Group();
+  const art=paintExhibit(exhibit);
+  const map=new T.CanvasTexture(art);map.colorSpace=T.SRGBColorSpace;map.anisotropy=8;map.minFilter=T.LinearFilter;
+  const w=1.62,h=2.08,d=.05;
+  const wood=new T.MeshStandardMaterial({color:dark?0x8a6a3a:0xb0894f,roughness:.45,metalness:.18});
+  const outer=new T.Mesh(new T.BoxGeometry(w+.16,h+.16,d),wood);
+  const mat=new T.MeshStandardMaterial({color:dark?0x1b3844:0xf7f1e4,roughness:.9});
+  const mount=new T.Mesh(new T.BoxGeometry(w+.04,h+.04,.012),mat);mount.position.z=d*.5;
+  const print=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map}));print.position.z=d*.62;
+  const lamp=new T.Mesh(new T.BoxGeometry(w*.72,.05,.1),new T.MeshStandardMaterial({color:0xe8f4f7,emissive:0xcff7ff,emissiveIntensity:dark?1.1:.8,metalness:.4,roughness:.3}));lamp.position.set(0,h/2+.14,.1);
+  print.userData.exhibit=exhibit;outer.userData.exhibit=exhibit;mount.userData.exhibit=exhibit;
+  group.add(outer,mount,print,lamp);
+  group.userData.exhibit=exhibit;
+  group.userData.maps=[map];
+  group.userData.wood=wood;
+  group.userData.mat=mat;
+  return group;
+ }
 
 export function createLabRoom(scene:T.Scene){
  const lab=new T.Group();scene.add(lab);
@@ -50,13 +48,14 @@ export function createLabRoom(scene:T.Scene){
  const floor=new T.Mesh(new T.PlaneGeometry(H*2,H*2),new T.MeshStandardMaterial({map:floorMap,roughness:.92,metalness:.04}));floor.rotation.x=-Math.PI/2;floor.position.y=-.021;lab.add(floor);
  const wallMat=new T.MeshStandardMaterial({map:wallMap,color:0xf4fbfc,roughness:.96,metalness:.02,side:T.FrontSide});
  const dadoMat=new T.MeshStandardMaterial({color:0xc5dde3,roughness:.7,metalness:.08});
- const makeWall=(w:number,h:number,pos:T.Vector3,rotY:number)=>{
-  const wall=new T.Mesh(new T.PlaneGeometry(w,h),wallMat.clone());wall.position.copy(pos);wall.rotation.y=rotY;lab.add(wall);
-  const dado=new T.Mesh(new T.PlaneGeometry(w,1.12),dadoMat.clone());dado.position.copy(pos);dado.position.y=.56;dado.rotation.y=rotY;dado.position.add(new T.Vector3(Math.sin(rotY)*.012,0,Math.cos(rotY)*.012));lab.add(dado);
-  const rail=new T.Mesh(new T.BoxGeometry(w,.035,.04),new T.MeshStandardMaterial({color:0x9ecad6,roughness:.4,metalness:.25}));rail.position.copy(pos);rail.position.y=1.14;lab.add(rail);
-  const base=new T.Mesh(new T.BoxGeometry(w,.08,.05),new T.MeshStandardMaterial({color:0x9ecad6,roughness:.5,metalness:.2}));base.position.copy(pos);base.position.y=.04;lab.add(base);
-  return wall;
- };
+  const makeWall=(w:number,h:number,pos:T.Vector3,rotY:number)=>{
+   const inward=new T.Vector3(Math.sin(rotY),0,Math.cos(rotY));
+   const wall=new T.Mesh(new T.PlaneGeometry(w,h),wallMat.clone());wall.position.copy(pos);wall.rotation.y=rotY;lab.add(wall);
+   const dado=new T.Mesh(new T.PlaneGeometry(w,1.12),dadoMat.clone());dado.position.copy(pos).addScaledVector(inward,.012);dado.position.y=.56;dado.rotation.y=rotY;lab.add(dado);
+   const rail=new T.Mesh(new T.BoxGeometry(w,.035,.05),new T.MeshStandardMaterial({color:0x9ecad6,roughness:.4,metalness:.25}));rail.position.copy(pos).addScaledVector(inward,.028);rail.position.y=1.14;rail.rotation.y=rotY;lab.add(rail);
+   const base=new T.Mesh(new T.BoxGeometry(w,.08,.06),new T.MeshStandardMaterial({color:0x9ecad6,roughness:.5,metalness:.2}));base.position.copy(pos).addScaledVector(inward,.03);base.position.y=.04;base.rotation.y=rotY;lab.add(base);
+   return wall;
+  };
  const back=makeWall(H*2,Y,new T.Vector3(0,Y/2,-H),0);
  const front=makeWall(H*2,Y,new T.Vector3(0,Y/2,H),Math.PI);
  const left=makeWall(H*2,Y,new T.Vector3(-H,Y/2,0),Math.PI/2);
@@ -74,7 +73,7 @@ export function createLabRoom(scene:T.Scene){
  const pickables:T.Object3D[]=[];
  const place=(exhibit:LabExhibit)=>{
   const g=frameMesh(exhibit,false);
-  const y=2.18,span=3.35,x=(exhibit.slot-1)*span;
+   const y=2.28,span=3.55,x=(exhibit.slot-1)*span;
   if(exhibit.wall==='back'){g.position.set(x,y,-H+.08);}
   else if(exhibit.wall==='left'){g.position.set(-H+.08,y,x);g.rotation.y=Math.PI/2;}
   else {g.position.set(H-.08,y,x);g.rotation.y=-Math.PI/2;}

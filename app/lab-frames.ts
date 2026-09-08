@@ -12,67 +12,91 @@ export const LAB_EXHIBITS:LabExhibit[]=[
  {id:'frame-ear',name:'Inner ear',system:'Sensory organs',wall:'right',slot:2,description:'The cochlea turns vibration into hearing signals. Nearby semicircular canals sense head rotation and help keep balance, working with vision and body position.'},
 ];
 
-function paper(ctx:CanvasRenderingContext2D,w:number,h:number){
- ctx.fillStyle='#f6efe2';ctx.fillRect(0,0,w,h);
- ctx.strokeStyle='#e4d5bc';ctx.lineWidth=18;ctx.strokeRect(9,9,w-18,h-18);
- ctx.fillStyle='#6b4f32';ctx.font='600 22px Figtree,serif';ctx.textAlign='center';
+function paper(ctx:CanvasRenderingContext2D,w:number,h:number,title:string,system:string){
+ ctx.fillStyle='#fbf6ec';ctx.fillRect(0,0,w,h);
+ ctx.fillStyle='#efe4d0';ctx.fillRect(28,28,w-56,h-56);
+ ctx.strokeStyle='#c9ad86';ctx.lineWidth=10;ctx.strokeRect(44,44,w-88,h-88);
+ ctx.fillStyle='#6b4f32';ctx.textAlign='center';
+ ctx.font='700 54px Figtree,serif';ctx.fillText(title.toUpperCase(),w/2,h-92);
+ ctx.font='600 26px Figtree,sans-serif';ctx.fillStyle='#8a6a45';ctx.fillText(system.toUpperCase(),w/2,h-52);
 }
 
-function ink(ctx:CanvasRenderingContext2D,stroke='#5c3d2e',fill='#c97864'){
- ctx.strokeStyle=stroke;ctx.fillStyle=fill;ctx.lineWidth=3;ctx.lineJoin='round';ctx.lineCap='round';
+function stroke(ctx:CanvasRenderingContext2D,color='#4a2f22',width=8){
+ ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';
 }
 
-export function paintExhibit(id:string){
- const c=document.createElement('canvas');c.width=512;c.height=640;
- const ctx=c.getContext('2d')!;paper(ctx,512,640);ink(ctx);
+export function paintExhibit(exhibit:LabExhibit){
+ const c=document.createElement('canvas');c.width=768;c.height=1024;
+ const ctx=c.getContext('2d')!;paper(ctx,768,1024,exhibit.name,exhibit.system);stroke(ctx);
+ const id=exhibit.id;
  if(id==='frame-brain'){
-  ctx.beginPath();ctx.ellipse(256,250,148,128,0,0,Math.PI*2);ctx.fillStyle='#e7c9a4';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(130,240);for(let x=130;x<390;x+=18)ctx.quadraticCurveTo(x+8,230+((x>>3)%2?18:-16),x+18,242);ctx.stroke();
-  ctx.beginPath();ctx.ellipse(256,400,78,48,0,0,Math.PI*2);ctx.fillStyle='#d9b48c';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(256,430);ctx.quadraticCurveTo(270,490,262,530);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('BRAIN',256,590);
+  ctx.fillStyle='#e8c49a';
+  ctx.beginPath();ctx.ellipse(384,430,230,210,-.08,0,Math.PI*2);ctx.fill();stroke(ctx,'#5a3a28',9);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(180,400);
+  for(let x=180;x<590;x+=28)ctx.quadraticCurveTo(x+14,388+((x>>4)%2?36:-32),x+28,404);
+  ctx.stroke();
+  ctx.beginPath();ctx.moveTo(210,470);
+  for(let x=210;x<560;x+=32)ctx.quadraticCurveTo(x+16,458+((x>>5)%2?28:-24),x+32,474);
+  ctx.stroke();
+  ctx.fillStyle='#d4a57a';
+  ctx.beginPath();ctx.ellipse(384,650,118,72,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(384,710);ctx.quadraticCurveTo(406,790,392,850);ctx.stroke();
  }else if(id==='frame-heart'){
-  ctx.beginPath();ctx.moveTo(256,470);ctx.bezierCurveTo(80,330,110,160,256,230);ctx.bezierCurveTo(402,160,432,330,256,470);ctx.fillStyle='#c96b63';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(256,230);ctx.lineTo(256,455);ctx.moveTo(150,300);ctx.lineTo(360,300);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(256,170);ctx.bezierCurveTo(270,120,300,110,310,70);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('HEART',256,590);
+  ctx.fillStyle='#c45a54';
+  ctx.beginPath();ctx.moveTo(384,760);ctx.bezierCurveTo(90,540,140,250,384,360);ctx.bezierCurveTo(628,250,678,540,384,760);ctx.fill();stroke(ctx,'#6a2c28',10);ctx.stroke();
+  stroke(ctx,'#f3d7d2',7);
+  ctx.beginPath();ctx.moveTo(384,370);ctx.lineTo(384,730);ctx.moveTo(220,500);ctx.lineTo(548,500);ctx.stroke();
+  stroke(ctx,'#6a2c28',10);
+  ctx.beginPath();ctx.moveTo(384,250);ctx.bezierCurveTo(404,170,454,150,470,90);ctx.moveTo(430,250);ctx.bezierCurveTo(460,180,510,160,530,110);ctx.stroke();
  }else if(id==='frame-lungs'){
-  ctx.beginPath();ctx.moveTo(240,170);ctx.bezierCurveTo(40,180,70,500,230,520);ctx.lineTo(240,170);ctx.fillStyle='#d7a3ab';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(272,170);ctx.bezierCurveTo(472,180,442,500,282,520);ctx.lineTo(272,170);ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(256,120);ctx.lineTo(256,210);ctx.moveTo(256,210);ctx.lineTo(200,250);ctx.moveTo(256,210);ctx.lineTo(312,250);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('LUNGS',256,590);
+  ctx.fillStyle='#d88993';
+  ctx.beginPath();ctx.moveTo(350,240);ctx.bezierCurveTo(70,250,90,780,340,820);ctx.lineTo(350,240);ctx.fill();stroke(ctx,'#6a3540',9);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(418,240);ctx.bezierCurveTo(698,250,678,780,428,820);ctx.lineTo(418,240);ctx.fill();ctx.stroke();
+  stroke(ctx,'#6a3540',10);
+  ctx.beginPath();ctx.moveTo(384,140);ctx.lineTo(384,280);ctx.moveTo(384,280);ctx.lineTo(300,360);ctx.moveTo(384,280);ctx.lineTo(468,360);ctx.stroke();
+  stroke(ctx,'#8a4a54',6);
+  ctx.beginPath();ctx.moveTo(300,430);ctx.lineTo(250,520);ctx.moveTo(300,430);ctx.lineTo(330,540);ctx.moveTo(468,430);ctx.lineTo(518,520);ctx.moveTo(468,430);ctx.lineTo(438,540);ctx.stroke();
  }else if(id==='frame-eye'){
-  ctx.beginPath();ctx.ellipse(256,300,170,110,0,0,Math.PI*2);ctx.fillStyle='#f3e7d4';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.arc(256,300,78,0,Math.PI*2);ctx.fillStyle='#6fa3b3';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.arc(256,300,34,0,Math.PI*2);ctx.fillStyle='#24323a';ctx.fill();
-  ctx.beginPath();ctx.moveTo(86,300);ctx.quadraticCurveTo(40,300,28,270);ctx.stroke();
-  ctx.beginPath();ctx.arc(426,300,18,0,Math.PI*2);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('EYE',256,590);
+  ctx.fillStyle='#f7ead6';
+  ctx.beginPath();ctx.ellipse(384,460,270,170,0,0,Math.PI*2);ctx.fill();stroke(ctx,'#5a3a28',10);ctx.stroke();
+  ctx.fillStyle='#4f90a8';
+  ctx.beginPath();ctx.arc(384,460,128,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#1b2730';
+  ctx.beginPath();ctx.arc(384,460,58,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(350,430,18,0,Math.PI*2);ctx.fill();
+  stroke(ctx,'#5a3a28',10);
+  ctx.beginPath();ctx.moveTo(114,460);ctx.quadraticCurveTo(40,460,24,410);ctx.stroke();
+  ctx.beginPath();ctx.arc(654,460,28,0,Math.PI*2);ctx.stroke();
  }else if(id==='frame-kidney'){
-  ctx.beginPath();ctx.ellipse(256,300,110,170,-.2,0,Math.PI*2);ctx.fillStyle='#d59b86';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.ellipse(268,300,62,110,-.2,0,Math.PI*2);ctx.fillStyle='#c07a66';ctx.fill();ctx.stroke();
-  for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(250,210+i*36);ctx.lineTo(300,230+i*32);ctx.stroke();}
-  ctx.beginPath();ctx.moveTo(330,300);ctx.quadraticCurveTo(390,330,400,430);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('KIDNEY',256,590);
+  ctx.fillStyle='#d48974';
+  ctx.beginPath();ctx.ellipse(360,470,170,250,-.18,0,Math.PI*2);ctx.fill();stroke(ctx,'#6a3a2c',10);ctx.stroke();
+  ctx.fillStyle='#c46d58';
+  ctx.beginPath();ctx.ellipse(376,470,96,168,-.18,0,Math.PI*2);ctx.fill();ctx.stroke();
+  stroke(ctx,'#6a3a2c',7);
+  for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(350,300+i*52);ctx.lineTo(430,328+i*46);ctx.stroke();}
+  stroke(ctx,'#6a3a2c',10);
+  ctx.beginPath();ctx.moveTo(500,470);ctx.quadraticCurveTo(590,520,610,680);ctx.stroke();
  }else if(id==='frame-liver'){
-  ctx.beginPath();ctx.moveTo(90,240);ctx.bezierCurveTo(80,140,430,120,430,250);ctx.bezierCurveTo(440,360,360,430,250,430);ctx.bezierCurveTo(120,430,90,340,90,240);ctx.fillStyle='#c49a6c';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(250,160);ctx.quadraticCurveTo(260,280,240,420);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('LIVER',256,590);
+  ctx.fillStyle='#c48a55';
+  ctx.beginPath();ctx.moveTo(120,360);ctx.bezierCurveTo(100,180,650,150,650,360);ctx.bezierCurveTo(660,540,540,680,360,680);ctx.bezierCurveTo(150,680,110,520,120,360);ctx.fill();stroke(ctx,'#6a4528',10);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(360,210);ctx.quadraticCurveTo(380,430,350,660);ctx.stroke();
  }else if(id==='frame-stomach'){
-  ctx.beginPath();ctx.moveTo(210,140);ctx.bezierCurveTo(90,180,80,360,200,400);ctx.bezierCurveTo(360,450,400,280,300,210);ctx.bezierCurveTo(250,170,250,150,210,140);ctx.fillStyle='#d2a07a';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(210,140);ctx.lineTo(210,90);ctx.moveTo(330,400);ctx.quadraticCurveTo(360,460,300,500);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('STOMACH',256,590);
+  ctx.fillStyle='#d6a070';
+  ctx.beginPath();ctx.moveTo(300,180);ctx.bezierCurveTo(110,240,90,560,280,640);ctx.bezierCurveTo(540,720,610,430,450,300);ctx.bezierCurveTo(370,230,370,190,300,180);ctx.fill();stroke(ctx,'#6a4528',10);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(300,180);ctx.lineTo(300,90);ctx.moveTo(500,640);ctx.quadraticCurveTo(560,740,460,810);ctx.stroke();
  }else if(id==='frame-kidney-nephron'){
-  ctx.beginPath();ctx.arc(210,220,48,0,Math.PI*2);ctx.fillStyle='#e2b7a4';ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.arc(210,220,22,0,Math.PI*2);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(255,230);ctx.bezierCurveTo(360,180,390,320,300,340);ctx.bezierCurveTo(220,360,360,430,250,470);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('NEPHRON',256,590);
+  ctx.fillStyle='#e8b9a6';
+  ctx.beginPath();ctx.arc(300,300,90,0,Math.PI*2);ctx.fill();stroke(ctx,'#6a3a2c',10);ctx.stroke();
+  ctx.beginPath();ctx.arc(300,300,42,0,Math.PI*2);ctx.stroke();
+  stroke(ctx,'#6a3a2c',9);
+  ctx.beginPath();ctx.moveTo(384,318);ctx.bezierCurveTo(560,230,610,470,450,510);ctx.bezierCurveTo(300,550,560,680,370,760);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(210,250);ctx.quadraticCurveTo(140,220,90,250);ctx.moveTo(210,350);ctx.quadraticCurveTo(140,380,90,350);ctx.stroke();
  }else{
-  ctx.beginPath();ctx.ellipse(256,300,70,70,0,0,Math.PI*2);ctx.stroke();
-  ctx.beginPath();ctx.arc(256,300,28,0,Math.PI*2);ctx.stroke();
-  let a=0;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(256,300,90,26,a,0,Math.PI*2);ctx.stroke();a+=Math.PI/3;}
-  ctx.beginPath();ctx.moveTo(326,300);ctx.lineTo(400,300);ctx.stroke();
-  ctx.fillStyle='#6b4f32';ctx.fillText('INNER EAR',256,590);
+  stroke(ctx,'#5a3a28',10);
+  ctx.beginPath();ctx.ellipse(384,470,120,120,0,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(384,470,48,0,Math.PI*2);ctx.stroke();
+  let a=0;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(384,470,150,42,a,0,Math.PI*2);ctx.stroke();a+=Math.PI/3;}
+  ctx.beginPath();ctx.moveTo(504,470);ctx.lineTo(640,470);ctx.stroke();
  }
  return c;
 }
